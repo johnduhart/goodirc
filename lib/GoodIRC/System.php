@@ -94,7 +94,8 @@ class System extends Context implements IContext {
 		$this->logger->debug( 'Recieved configuration' );
 
 		// Load plugins
-		$this->registerPlugin( 'join', new Plugin\AutojoinPlugin );
+		$this->registerPlugin( 'command', '\GoodIRC\Plugin\CommandPlugin' );
+		$this->registerPlugin( 'join', '\GoodIRC\Plugin\AutojoinPlugin' );
 
 		// Get the path of the IRC socket
 		$packet = GoodIRC::expectPacket( $this->masterSocket, new IPCPacket\IRCSocketPacket );
@@ -165,9 +166,19 @@ class System extends Context implements IContext {
 	 * Registers a plugin
 	 *
 	 * @param $name
-	 * @param Plugin\BasePlugin $plugin
+	 * @param $plugin
 	 */
-	private function registerPlugin( $name, BasePlugin $plugin ) {
+	public function registerPlugin( $name, $plugin ) {
+		// Autoload the function
+		class_exists( $plugin, true );
+
+		if ( !is_subclass_of( $plugin, '\GoodIRC\Plugin\BasePlugin' ) ) {
+			$this->logger->err( "Invalid plugin $plugin" );
+			return;
+		}
+
+		$plugin = new $plugin( $this );
+		$plugin->setup();
 		$this->plugins[$name] = $plugin;
 	}
 
@@ -179,6 +190,10 @@ class System extends Context implements IContext {
 	public function sendIrcMessage( BaseMessage $message ) {
 		$this->logger->debug( "Writing message!" );
 		$this->ircSocket->write( IRCMessagePacket::create()->setMessage( $message ) );
+	}
+
+	public function registerCommand( $name, $callback, $aliases = array() ) {
+		$this->plugins['command']->registerCommand( $name, $callback, $aliases );
 	}
 
 	/**

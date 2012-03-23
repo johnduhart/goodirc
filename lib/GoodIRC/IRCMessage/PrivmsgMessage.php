@@ -4,14 +4,7 @@ namespace GoodIRC\IRCMessage;
 
 use GoodIRC\IRCHostname;
 
-class PrivmsgMessage extends BaseMessage {
-
-	/**
-	 * Hostname
-	 *
-	 * @var null|\GoodIRC\IRCHostname
-	 */
-	private $host;
+class PrivmsgMessage extends BaseHostMessage {
 
 	/**
 	 * Where the message was sent
@@ -37,7 +30,8 @@ class PrivmsgMessage extends BaseMessage {
 	}
 
 	/**
-	 * Returns the IRC name of the command
+	 * Returns the IRC name of the command		$this->host = new \GoodIRC\IRCHostname()
+
 	 *
 	 * @return string
 	 */
@@ -53,7 +47,7 @@ class PrivmsgMessage extends BaseMessage {
 	public function parse( $line ) {
 		list( $host, , $destination, $message ) = explode( ' ', $line, 4 );
 
-		$this->host = new IRCHostname( $host );
+		$this->setHost( $host );
 		$this->destination = $destination;
 		$this->message = substr( $message, 1 );
 	}
@@ -65,5 +59,19 @@ class PrivmsgMessage extends BaseMessage {
 	 */
 	public function __toString() {
 		return "PRIVMSG {$this->destination} :{$this->message}";
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMessage() {
+		return $this->message;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDestination() {
+		return $this->destination;
 	}
 }

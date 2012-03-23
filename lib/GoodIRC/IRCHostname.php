@@ -25,7 +25,7 @@ class IRCHostname {
 	private $hostname;
 
 	public function __construct( $hostname ) {
-		preg_match( '/(?<nick>.+)!(?<user>.+)@(?<host>.+)/', $hostname, $matches );
+		preg_match( '/:?(?<nick>.+)!(?<user>.+)@(?<host>.+)/', $hostname, $matches );
 		$this->nick = $matches['nick'];
 		$this->username = $matches['user'];
 		$this->hostname = $matches['host'];
